@@ -171,6 +171,17 @@ class CiviCRM_For_WordPress_Basepage {
     // add compatibility with WordPress SEO plugin's Open Graph title
     add_filter( 'wpseo_opengraph_title', array( $this, 'wpseo_page_title' ), 100, 1 );
 
+    // unhook the built-in WordPress canonical URL filter
+    remove_action( 'wp_head', 'rel_canonical' );
+
+    // remove WordPress SEO's canonical rewriter
+    if ( class_exists( 'WPSEO_Frontend' ) ) {
+      remove_action( 'wpseo_head', array( WPSEO_Frontend::get_instance(), 'canonical' ), 20 );
+    }
+
+    // add our own, which will respect the attached querystring
+    add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+
     // include this content when base page is rendered
     add_filter( 'the_content', array( $this, 'basepage_render' ) );
 
@@ -243,6 +254,56 @@ class CiviCRM_For_WordPress_Basepage {
 
     // hand back our base page title
     return $this->basepage_title;
+
+  }
+
+
+  /**
+   * Get CiviCRM base page canonical URL
+   *
+   * Callback method for 'wp_head' hook, always called from WP front-end
+   *
+   * @param object $wp The WP object, present but not used
+   * @return void
+   */
+  public function rel_canonical() {
+
+    // access query
+    global $wp_the_query;
+
+    // bail if no page ID
+    if ( !$id = $wp_the_query->get_queried_object_id() ) return;
+
+    // get arguments
+    $links = array();
+    foreach( $_GET AS $var => $arg ) {
+      if ( ! empty( $arg ) AND $var != 'q' AND $var != 'page' AND $var != 'noheader' ) {
+        $links[] = $var . '=' . $arg;
+      }
+    }
+    $query = implode( '&', $links );
+
+    // $absolute, $frontend, $forceBackend
+    $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
+
+    // get args
+    $args = $this->civi->get_request_args();
+
+    // construct query parts
+    $queryParts = array();
+    $queryParts[] = 'page=CiviCRM';
+    if (isset($args['argString'])) {
+      $queryParts[] = 'q=' . $args['argString'];
+    }
+    if (isset($query)) {
+      $queryParts[] = $query;
+    }
+
+    // construct link
+    $link = trailingslashit( $base_url ) . '?' . implode('&', $queryParts);
+    //print_r( $link ); die();
+
+    echo '<link rel="canonical" href="' . esc_url( $link ) . '" ' . "/>\n";
 
   }
 
