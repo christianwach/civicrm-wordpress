@@ -45,6 +45,14 @@ class CiviCRM_For_WordPress_Admin {
   public $page_integration;
 
   /**
+   * @var object
+   * Settings page object.
+   * @since 5.34
+   * @access public
+   */
+  public $page_options;
+
+  /**
    * Instance constructor.
    *
    * @since 5.33
@@ -72,6 +80,7 @@ class CiviCRM_For_WordPress_Admin {
 
     // Include class files.
     include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.integration.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.options.php';
 
   }
 
@@ -84,6 +93,7 @@ class CiviCRM_For_WordPress_Admin {
 
     // Instantiate objects.
     $this->page_integration = new CiviCRM_For_WordPress_Admin_Page_Integration();
+    $this->page_options = new CiviCRM_For_WordPress_Admin_Page_Options();
 
   }
 
@@ -617,6 +627,72 @@ class CiviCRM_For_WordPress_Admin {
       // Yes - set new path (this could be because we've changed server or location)
       CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
     }
+
+  }
+
+  /**
+   * Get a CiviCRM admin link.
+   *
+   * @since 5.34
+   *
+   * @param str $path The CiviCRM path.
+   * @param str $params The CiviCRM parameters.
+   * @return string $link The URL of the CiviCRM page.
+   */
+  public function get_admin_link($path = '', $params = NULL) {
+
+    // Init link.
+    $link = '';
+
+    if (!$this->civi->initialize()) {
+      return $link;
+    }
+
+    // Use CiviCRM to construct link.
+    $link = CRM_Utils_System::url(
+      $path,
+      $params,
+      TRUE,
+      NULL,
+      TRUE,
+      FALSE,
+      TRUE
+    );
+
+    // --<
+    return $link;
+
+  }
+
+  /**
+   * Clear CiviCRM caches.
+   *
+   * Another way to do this might be:
+   * CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+   *
+   * @since 5.34
+   */
+  public function clear_caches() {
+
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    // Access config object.
+    $config = CRM_Core_Config::singleton();
+
+    // Clear database cache.
+    $config->clearDBCache();
+
+    // Cleanup the "templates_c" directory.
+    $config->cleanup(1, TRUE);
+
+    // Cleanup the session object.
+    $session = CRM_Core_Session::singleton();
+    $session->reset(1);
+
+    // Call system flush.
+    CRM_Utils_System::flushCache();
 
   }
 
