@@ -101,6 +101,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
 
     // Add scripts for this page.
     add_action('admin_head-' . $integration_page, [$this, 'admin_head']);
+    add_action('admin_print_styles-' . $integration_page, [$this, 'admin_css']);
 
   }
 
@@ -115,6 +116,24 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
     wp_enqueue_script('common');
     wp_enqueue_script('jquery-ui-sortable');
     wp_enqueue_script('dashboard');
+
+  }
+
+  /**
+   * Enqueue stylesheet on this page.
+   *
+   * @since 5.34
+   */
+  public function admin_css() {
+
+    // Enqueue common CSS.
+    wp_enqueue_style(
+      'civicrm-admin-styles',
+      CIVICRM_PLUGIN_URL . 'assets/css/civicrm.admin.css',
+      NULL,
+      CIVICRM_PLUGIN_VERSION,
+      'all'
+    );
 
   }
 

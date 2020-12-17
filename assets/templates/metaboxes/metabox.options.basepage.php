@@ -44,7 +44,7 @@ do_action('civicrm/metabox/basepage/pre');
 <label for="page_id" class="screen-reader-text"><?php _e('Choose Base Page', 'civicrm'); ?></label>
 <?php wp_dropdown_pages($params); ?>
 
-<p class="submit" style="padding: 0; margin: 0; float: right;">
+<p class="submit">
   <?php submit_button($value, 'primary', 'civicrm_options_basepage_submit', FALSE, $options); ?>
   <span class="spinner"></span>
 </p>

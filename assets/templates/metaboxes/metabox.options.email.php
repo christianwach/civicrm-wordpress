@@ -36,7 +36,7 @@ do_action('civicrm/metabox/email_sync/pre');
   <option value="no"<?php echo $selected_no; ?>><?php esc_html_e('No', 'civicrm'); ?></option>
 </select>
 
-<p class="submit" style="padding: 0; margin: 0; float: right;">
+<p class="submit">
   <?php submit_button(esc_html__('Saved', 'civicrm'), 'primary', 'civicrm_options_email_submit', FALSE, $options); ?>
   <span class="spinner"></span>
 </p>

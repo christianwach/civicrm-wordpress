@@ -101,11 +101,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Add resources prior on page load.
     add_action('admin_head-' . $options_page, [$this, 'admin_head']);
+    add_action('admin_print_styles-' . $options_page, [$this, 'admin_css']);
 
   }
 
   /**
-   * Enqueue WordPress scripts on the pages that need them.
+   * Enqueue scripts on the pages that need them.
    *
    * @since 5.34
    */
@@ -144,6 +145,24 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'civicrm-options-script',
       'CiviCRM_Options_Vars',
       $vars
+    );
+
+  }
+
+  /**
+   * Enqueue stylesheet on this page.
+   *
+   * @since 5.34
+   */
+  public function admin_css() {
+
+    // Enqueue common CSS.
+    wp_enqueue_style(
+      'civicrm-admin-styles',
+      CIVICRM_PLUGIN_URL . 'assets/css/civicrm.admin.css',
+      NULL,
+      CIVICRM_PLUGIN_VERSION,
+      'all'
     );
 
   }
@@ -307,6 +326,16 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $basepage = array_pop($pages);
     }
 
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      'basepage' => $basepage,
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
+
     // Define the params for the Pages dropdown.
     $params = [
       'post_type' => 'page',
@@ -366,6 +395,16 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     // Set selected attributes.
     $selected_yes = $email_sync_select ? 'selected="selected"' : '';
     $selected_no = $email_sync_select ? '' : 'selected="selected"';
+
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      'email_sync_select' => $email_sync_select ? 'yes' : 'no',
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
 
     // Set submit button options.
     $options = [
@@ -455,6 +494,16 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       wp_send_json($data);
     }
 
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      'POST' => $_POST,
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
+
     // Bail if there's no valid Post ID.
     $post_id = empty($_POST['value']) ? 0 : (int) trim($_POST['value']);
     if ($post_id === 0) {
@@ -480,6 +529,16 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'name' => 'wpBasePage',
       'group' => 'CiviCRM Preferences',
     ]);
+
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      'actual' => $actual,
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
 
     // Query for our Base Page.
     $pages = get_posts([
@@ -554,6 +613,18 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'group' => 'CiviCRM Preferences',
     ]);
 
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      'result' => $result,
+      'actual' => $actual,
+      'result2' => $result2,
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
+
     // Data response.
     $data = [
       'section' => 'email_sync',
@@ -590,6 +661,17 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Bail if there is no valid value.
     $chosen = isset($_POST['value']) ? (int) trim($_POST['value']) : 0;
+
+    /*
+    $e = new \Exception();
+    $trace = $e->getTraceAsString();
+    error_log(print_r([
+      'method' => __METHOD__,
+      '_POST' => $_POST,
+      'chosen' => $chosen,
+      //'backtrace' => $trace,
+    ], TRUE));
+    */
 
     if ($chosen !== 1) {
       $data['notice'] = __('Unrecognised parameter. Could not clear the CiviCRM caches.', 'civicrm');
