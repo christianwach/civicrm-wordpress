@@ -301,6 +301,17 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         $_SERVER['HTTPS'] = 'on';
       }
 
+      if ($plugin_path = $this->getOption('destination', FALSE)) {
+        $plugin_path = ABSPATH . $plugin_path;
+      }
+      else {
+        $plugin_path = WP_PLUGIN_DIR . '/civicrm';
+      }
+
+      global $crmPath;
+      $crmPath = "$plugin_path/civicrm";
+      $crm_files_present = is_dir($crmPath);
+
       // Identify destination.
 
       if ($plugin_path = $this->getOption('destination', FALSE)) {
@@ -341,6 +352,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       }
 
       // Extract the archive.
+
       if ($this->getOption('tarfile', FALSE)) {
         // Should probably never get to here as WordPress CiviCRM comes as a zip file.
         // Check anyway just in case that ever changes.
@@ -372,7 +384,8 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       // Include CiviCRM Installer helper file.
       $civicrm_installer_helper = "$crmPath/install/civicrm.php";
 
-      if (!file_exists($civicrm_installer_helper)) {
+
+      if (!file_exists($classLoaderPath)) {
         return WP_CLI::error('Archive could not be unpacked or CiviCRM installer helper file is missing.');
       }
 
