@@ -61,6 +61,14 @@ class CiviCRM_For_WordPress_Basepage {
   public $basepage_markup = '';
 
   /**
+   * @var bool
+   * Flag whether an Afform is being rendered.
+   * @since 6.13
+   * @access public
+   */
+  public $afform = FALSE;
+
+  /**
    * Instance constructor.
    *
    * @since 4.6
@@ -419,6 +427,13 @@ class CiviCRM_For_WordPress_Basepage {
           // Set context.
           $this->civi->civicrm_context_set('basepage');
 
+          // Add callback for "civi.invoke.auth" hook to check for Afform.
+          Civi::service('dispatcher')->addListener(
+            'civi.invoke.auth',
+            [ $this, 'afform_check' ],
+            -100 // Default priority.
+          );
+
           // Start buffering.
           ob_start();
           // Now, instead of echoing, Base Page output ends up in buffer.
@@ -441,8 +456,18 @@ class CiviCRM_For_WordPress_Basepage {
            * page title if other plugins modify it.
            */
 
-          // Override post title.
           global $civicrm_wp_title;
+
+          // Maybe extract and assign the Afform title.
+          if ($this->afform !== FALSE) {
+            $afform = civicrm_api4('Afform', 'get', [
+              'where' => [['name', '=', $this->afform]],
+              'select' => ['title'],
+            ], 0);
+            $civicrm_wp_title = $afform['title'];
+          }
+
+          // Override post title.
           $post->post_title = $civicrm_wp_title;
 
           // Because the above seems unreliable, store title for later use.
@@ -527,6 +552,35 @@ class CiviCRM_For_WordPress_Basepage {
      * @since 4.4
      */
     do_action('civicrm_basepage_parsed');
+
+  }
+
+  /**
+   * Callback for the 'civi.invoke.auth' hook to check for an Afform being invoked.
+   *
+   * @since 6.13
+   *
+   * @param object $event The event object.
+   * @param string $hook The hook name.
+   */
+  public function afform_check($event, $hook) {
+
+    // Sanity check.
+    if (empty($event->args)) {
+      return;
+    }
+
+    // Try to get the CiviCRM page args.
+    $item = CRM_Core_Invoke::getItem($event->args);
+    $page_args = NULL;
+    if (!empty($item['page_arguments'])) {
+      $page_args = CRM_Core_Menu::getArrayForPathArgs($item['page_arguments']);
+    }
+
+		// Maybe set Afform flag.
+		if (!empty($page_args) && is_array($page_args) && array_key_exists('afform', $page_args)) {
+		  $this->afform = $page_args['afform'];
+		}
 
   }
 
